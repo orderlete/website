@@ -6,11 +6,12 @@ import ProductCard from '@/components/ProductCard';
 import { Product } from '@/store/useCartStore';
 import { MOCK_PRODUCTS } from '@/constants/mockData';
 import { supabase } from '@/lib/supabase';
+import CallAction from '@/components/CallAction';
 import { ProductSkeleton } from '@/components/Skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Star, ChevronRight, Zap, Target } from 'lucide-react';
-import { useAuthStore } from '@/store/useAuthStore';
+import { ShoppingBag, HeartPulse, Pill, Zap, Activity, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface Category {
   id: string;
@@ -18,40 +19,40 @@ interface Category {
   image_url: string;
 }
 
-export default function Home() {
+export default function MedicalPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeMainCat, setActiveMainCat] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [bannerText, setBannerText] = useState('Artisanal Cakes Delivered in 15 Mins');
   const { user } = useAuthStore();
 
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
       try {
-        const { data: settings } = await supabase.from('settings').select('*');
-        if (settings) {
-          const banner = settings.find(s => s.key === 'banner_text')?.value;
-          if (banner) setBannerText(banner);
-        }
-
-        const { data: cats } = await supabase.from('categories').select('*').eq('section', 'confectionary').order('display_order');
+        const { data: cats } = await supabase
+          .from('categories')
+          .select('*')
+          .eq('section', 'medical')
+          .order('display_order');
         if (cats && cats.length > 0) setCategories(cats);
 
-        const { data, error } = await supabase.from('products').select('*').contains('categories', ['confectionary']);
-        
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .contains('categories', ['medical']);
+
         let finalProducts = [];
         if (error || !data || data.length === 0) {
-          finalProducts = MOCK_PRODUCTS.filter(p => (p as any).category === 'confectionary');
+          finalProducts = MOCK_PRODUCTS.filter(p => (p as any).category === 'medical');
         } else {
           finalProducts = data as Product[];
         }
         setProducts(finalProducts);
       } catch (err) {
-        setProducts(MOCK_PRODUCTS.filter(p => (p as any).category === 'confectionary'));
+        setProducts(MOCK_PRODUCTS.filter(p => (p as any).category === 'medical'));
       } finally {
         setTimeout(() => setLoading(false), 500);
       }
@@ -71,11 +72,9 @@ export default function Home() {
     
     if (searchQuery) {
       result = result.filter(p => 
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.description?.toLowerCase().includes(searchQuery.toLowerCase())
+        p.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
-    
     setFilteredProducts(result);
   }, [products, activeMainCat, searchQuery]);
 
@@ -84,30 +83,55 @@ export default function Home() {
       <Header 
         searchQuery={searchQuery} 
         setSearchQuery={setSearchQuery} 
-        placeholder="Search for cakes, desserts..."
+        placeholder="Medicines, Lab Tests..."
       />
       
       <main className="flex flex-col">
-        {/* Banner Section */}
-        <div className="px-5 mb-6 mt-2">
-           <div className="relative rounded-[28px] overflow-hidden aspect-[16/8] shadow-2xl shadow-orange-100 group">
-              <img 
-                src="https://images.unsplash.com/photo-1535141192574-5d4897c12636?w=800&q=80" 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                alt="Banner"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent flex flex-col justify-end p-6">
-                 <h2 className="text-xl font-black text-white leading-tight mb-1 uppercase tracking-tight">{bannerText}</h2>
-                 <p className="text-white/60 text-[10px] font-bold uppercase tracking-widest">Premium Selection</p>
+        {/* Pharma Banner - More Compact */}
+        <div className="px-5 mb-6 mt-2 flex flex-col gap-4">
+           {/* Pharma Banner */}
+           <div className="relative rounded-[28px] overflow-hidden aspect-[16/7] bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 p-6 shadow-2xl shadow-blue-50 group">
+              <div className="relative z-10 h-full flex flex-col justify-between">
+                 <div className="space-y-1">
+                    <span className="text-[9px] text-blue-200 font-black uppercase tracking-widest bg-white/10 w-fit px-2 py-0.5 rounded-full">Pharmacy</span>
+                    <h2 className="text-xl font-black text-white leading-tight">Express Medical <br/> Delivery</h2>
+                 </div>
+                 <div className="flex items-center gap-2">
+                    <div className="px-3 py-1.5 bg-white rounded-xl flex items-center gap-2">
+                       <Zap size={12} className="text-blue-600" fill="currentColor" />
+                       <span className="text-[10px] font-black text-blue-600 uppercase tracking-tighter">10 MINS</span>
+                    </div>
+                 </div>
               </div>
+              <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/5 rounded-full group-hover:scale-110 transition-transform duration-700" />
            </div>
+
+           <CallAction 
+             title="Medical Experts"
+             trigger={
+               <div className="bg-emerald-50 rounded-[28px] border border-emerald-100/50 p-5 flex items-center justify-between shadow-sm cursor-pointer">
+                  <div className="flex items-center gap-4">
+                     <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-emerald-600 shadow-sm">
+                        <Activity size={24} />
+                     </div>
+                     <div className="space-y-0.5">
+                        <p className="text-[12px] font-black text-emerald-900 tracking-tight">Need Custom Medicine?</p>
+                        <p className="text-[9px] font-bold text-emerald-800/60 uppercase tracking-widest">Talk to our pharmacist</p>
+                     </div>
+                  </div>
+                  <div className="bg-emerald-600 text-white px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-emerald-200 active:scale-95 transition-all">
+                     CALL NOW
+                  </div>
+               </div>
+             } 
+           />
         </div>
 
         {/* Smaller Circular Categories */}
         <section className="mb-6 overflow-hidden">
            <div className="px-5 flex items-center justify-between mb-4">
               <h3 className="text-[15px] font-black text-gray-900 tracking-tight">
-                {user?.name || 'Hey'}, what's on your mind?
+                {user?.name || 'Friend'}, find your essentials
               </h3>
            </div>
            
@@ -118,11 +142,11 @@ export default function Home() {
               >
                 <div className={cn(
                   "w-[60px] h-[60px] rounded-full flex items-center justify-center border transition-all shadow-sm",
-                  !activeMainCat ? "bg-gray-900 border-gray-900 text-white scale-105" : "bg-gray-50 border-gray-100 text-gray-400"
+                  !activeMainCat ? "bg-blue-600 border-blue-600 text-white scale-105" : "bg-gray-50 border-gray-100 text-gray-400"
                 )}>
-                   <Target size={20} />
+                   <Pill size={20} />
                 </div>
-                <span className={cn("text-[10px] font-black tracking-tight", !activeMainCat ? "text-gray-900" : "text-gray-400")}>All</span>
+                <span className={cn("text-[10px] font-black tracking-tight", !activeMainCat ? "text-blue-600" : "text-gray-400")}>Rx</span>
               </div>
 
               {categories.map((cat) => (
@@ -134,14 +158,14 @@ export default function Home() {
                   <div className={cn(
                     "w-[68px] h-[68px] rounded-full overflow-hidden border-2 transition-all p-1",
                     activeMainCat === cat.name 
-                      ? "border-primary bg-primary/5 scale-105 shadow-lg shadow-orange-100" 
+                      ? "border-blue-600 bg-blue-50 scale-105 shadow-lg shadow-blue-100" 
                       : "border-gray-50 bg-gray-50"
                   )}>
                     <img src={cat.image_url} className="w-full h-full object-cover rounded-full" alt={cat.name} />
                   </div>
                   <span className={cn(
                     "text-[10px] font-black tracking-tight",
-                    activeMainCat === cat.name ? "text-primary" : "text-gray-400"
+                    activeMainCat === cat.name ? "text-blue-600" : "text-gray-400"
                   )}>
                     {cat.name}
                   </span>
@@ -150,16 +174,16 @@ export default function Home() {
            </div>
         </section>
 
-        {/* Product Grid */}
+        {/* Medical Grid */}
         <section className="px-5 mb-8">
            <div className="flex items-center justify-between mb-4">
               <div className="flex flex-col gap-0.5">
                  <h3 className="text-[15px] font-black text-gray-900 tracking-tight uppercase">
-                   {activeMainCat || 'Freshly Baked Treats'}
+                   {activeMainCat || 'Apollo Specials'}
                  </h3>
                  <div className="flex items-center gap-1.5">
-                   <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                   <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Fastest delivery near you</span>
+                   <ShieldCheck size={12} className="text-emerald-500" />
+                   <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Verified Products</span>
                  </div>
               </div>
            </div>
@@ -172,8 +196,8 @@ export default function Home() {
                   ))
                 ) : filteredProducts.length === 0 ? (
                   <div className="col-span-2 py-20 flex flex-col items-center justify-center text-gray-300 gap-4 text-center">
-                     <ShoppingBag size={32} className="opacity-10" />
-                     <p className="text-[11px] font-black uppercase tracking-[0.2em] opacity-40">No matching treats found</p>
+                     <ShoppingBag size={32} className="opacity-10 text-blue-500" />
+                     <p className="text-[11px] font-black uppercase tracking-[0.2em] opacity-40">No medicines found</p>
                   </div>
                 ) : (
                   filteredProducts.map((product, i) => (
