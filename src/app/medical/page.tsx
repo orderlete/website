@@ -176,16 +176,10 @@ export default function MedicalPage() {
 
         {/* Medical Grid */}
         <section className="px-5 mb-8">
-           <div className="flex items-center justify-between mb-4">
-              <div className="flex flex-col gap-0.5">
-                 <h3 className="text-[15px] font-black text-gray-900 tracking-tight uppercase">
-                   {activeMainCat || 'Apollo Specials'}
-                 </h3>
-                 <div className="flex items-center gap-1.5">
-                   <ShieldCheck size={12} className="text-emerald-500" />
-                   <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Verified Products</span>
-                 </div>
-              </div>
+           <div className="flex flex-col mb-4">
+              <h3 className="text-[15px] font-black text-gray-900 tracking-tight uppercase">
+                {activeMainCat || 'All Medicines'}
+              </h3>
            </div>
            
            <div className="grid grid-cols-2 gap-3 pb-24">

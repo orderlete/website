@@ -14,11 +14,13 @@ import {
   Search,
   CheckCircle2,
   ShieldCheck,
-  Globe
+  Globe,
+  Plus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import { insertNotificationAdmin } from '../actions';
 
 export default function NotificationsAdmin() {
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -65,15 +67,16 @@ export default function NotificationsAdmin() {
     setSending(true);
     try {
       const payload = { ...form, user_id: selectedUser?.id || null };
-      const { error } = await supabase.from('notifications').insert(payload);
-      if (error) throw error;
+      const result = await insertNotificationAdmin(payload);
+      if (!result.success) throw new Error(result.error);
+      
       toast.success(selectedUser ? `Alert pushed to ${selectedUser.name}` : 'Global broadcast active!');
       setForm({ title: '', message: '', type: 'promo', user_id: null });
       setSelectedUser(null);
       setUserSearch('');
       fetchNotifications();
-    } catch (err) {
-      toast.error('Push failed');
+    } catch (err: any) {
+      toast.error('Push failed: ' + err.message);
     } finally {
       setSending(false);
     }

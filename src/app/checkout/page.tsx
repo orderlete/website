@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ArrowLeft, MapPin, Truck, Wallet, CheckCircle2, Phone, Shield, Zap, PartyPopper, Loader2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Truck, Wallet, CheckCircle2, Phone, Shield, Zap, PartyPopper, Loader2, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { formatPrice } from '@/lib/utils';
@@ -27,6 +27,8 @@ export default function CheckoutPage() {
   });
   const router = useRouter();
   const total = getTotal();
+  const deliveryFee = total < 300 ? 30 : 0;
+  const finalTotal = total + deliveryFee;
 
   const handlePlaceOrder = async () => {
     if (storeStatus === 'closed') {
@@ -41,18 +43,41 @@ export default function CheckoutPage() {
 
     setLoading(true);
     try {
+      if (!user?.id) {
+        toast.error('Please log in to place an order.');
+        router.push('/auth');
+        setLoading(false);
+        return;
+      }
+
+      // Verify the user profile still exists in the DB (prevents stale session foreign key errors)
+      const { data: dbProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (!dbProfile) {
+        toast.error('Session expired. Please log in again.');
+        router.push('/auth');
+        setLoading(false);
+        return;
+      }
+
+      const payload = {
+        user_id: dbProfile.id, 
+        phone: addressFields.phone,
+        total_amount: finalTotal,
+        status: 'placed',
+        address: `${addressFields.address}${addressFields.landmark ? ', ' + addressFields.landmark : ''}`,
+        pincode: addressFields.pincode,
+        customer_name: addressFields.name
+      };
+
       // 1. Insert Order
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
-        .insert({
-          user_id: user?.id || null, 
-          phone: addressFields.phone,
-          total_amount: total,
-          status: 'placed',
-          address: `${addressFields.address}${addressFields.landmark ? ', ' + addressFields.landmark : ''}`,
-          pincode: addressFields.pincode,
-          customer_name: addressFields.name
-        })
+        .insert(payload)
         .select()
         .single();
 
@@ -92,8 +117,8 @@ export default function CheckoutPage() {
         </motion.div>
         
         <div className="space-y-2">
-           <h1 className="text-3xl font-black text-foreground">Treat Incoming!</h1>
-           <p className="text-muted font-bold text-sm px-4">Your order has been received and is being prepared with love.</p>
+           <h1 className="text-3xl font-black text-foreground">ORDER CONFIRMED</h1>
+           <p className="text-muted font-bold text-sm px-4">Your order has been successfully placed.</p>
         </div>
 
         <button 
@@ -179,12 +204,16 @@ export default function CheckoutPage() {
                </div>
                <div className="flex justify-between items-center text-sm font-bold">
                   <span className="text-gray-500">Delivery Fee</span>
-                  <span className="text-emerald-500">FREE</span>
+                  {deliveryFee === 0 ? (
+                    <span className="text-emerald-500">FREE</span>
+                  ) : (
+                    <span className="text-gray-900">{formatPrice(deliveryFee)}</span>
+                  )}
                </div>
                <div className="h-px bg-gray-200" />
                <div className="flex justify-between items-center">
                   <span className="text-gray-900 font-black">To Pay</span>
-                  <span className="text-xl font-black text-gray-900">{formatPrice(total)}</span>
+                  <span className="text-xl font-black text-gray-900">{formatPrice(finalTotal)}</span>
                </div>
            </div>
         </section>

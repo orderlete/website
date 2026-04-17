@@ -23,6 +23,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'www.netmeds.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn01.pharmeasy.in',
+      },
     ],
   },
 };

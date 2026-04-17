@@ -73,7 +73,7 @@ export default function Header({ searchQuery, setSearchQuery, placeholder = "Sea
             <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
             <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-80">Live Tracking Enabled</span>
          </div>
-         <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-50">Est. Arrival 22-25 mins</span>
+         <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-50">Express Delivery</span>
          <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/20 to-transparent pointer-events-none" />
       </div>
 

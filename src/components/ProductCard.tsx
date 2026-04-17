@@ -22,11 +22,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       {/* Image Wrapper */}
       <Link href={`/product/${product.id}`}>
         <div className="relative aspect-[1/1] w-full overflow-hidden rounded-[24px] bg-gray-50">
-          <Image
+          <img
             src={product.image_url}
             alt={product.name}
-            fill
-            className="object-cover transition-transform duration-700 group-hover:scale-110"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
            <div className="absolute top-3 right-3 flex flex-col gap-2">
             {product.review_count && product.review_count > 0 ? (

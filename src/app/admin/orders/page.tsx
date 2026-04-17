@@ -18,6 +18,7 @@ import {
 import { formatPrice, cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { updateOrderStatusAdmin } from '../actions';
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -47,13 +48,24 @@ export default function AdminOrders() {
   }
 
   async function updateStatus(id: string, status: string) {
-    const { error } = await supabase.from('orders').update({ status }).eq('id', id);
-    if (error) toast.error('Failed to update status');
-    else {
+    try {
+      toast.loading(`Processing...`, { id: `loading-${id}` });
+      const result = await updateOrderStatusAdmin(id, status);
+      
+      toast.dismiss(`loading-${id}`);
+      
+      if (!result.success) {
+        toast.error('Action Failed: ' + result.error);
+        return;
+      }
+      
       toast.success(`Order ${status}`);
       const updated = orders.map(o => o.id === id ? { ...o, status } : o);
       setOrders(updated);
       setSelectedOrder(updated.find(o => o.id === id));
+    } catch (err: any) {
+      toast.dismiss(`loading-${id}`);
+      toast.error('Network Error: Make sure your server is online.');
     }
   }
 

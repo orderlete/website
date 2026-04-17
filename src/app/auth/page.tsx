@@ -3,37 +3,14 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
-  ArrowLeft, 
-  Sparkles, 
-  User as UserIcon, 
-  MapPin, 
-  Loader2, 
-  Lock, 
-  Phone, 
-  Hash, 
-  ShieldQuestion, 
-  Eye, 
-  EyeOff,
-  HelpCircle,
-  MessageSquare,
-  PhoneCall,
-  ShieldAlert
+  ArrowLeft, Sparkles, User as UserIcon, MapPin, Loader2, Lock, Phone, Hash, Eye, EyeOff
 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import LocationPicker from '@/components/LocationPicker';
-import CallAction from '@/components/CallAction';
 import { hashPassword } from '@/lib/utils';
-
-const SECURITY_QUESTIONS = [
-  "What was your first pet's name?",
-  "What is your mother's maiden name?",
-  "Which city were you born in?",
-  "What was the name of your first school?",
-  "What is your favorite food?"
-];
 
 export default function AuthPage() {
   const [mobile, setMobile] = useState('');
@@ -41,17 +18,15 @@ export default function AuthPage() {
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [pincode, setPincode] = useState('');
-  const [securityQuestion, setSecurityQuestion] = useState(SECURITY_QUESTIONS[0]);
-  const [securityAnswer, setSecurityAnswer] = useState('');
   
-  const [step, setStep] = useState(1); // 1: Login, 2: Signup, 3: Recovery
+  const [step, setStep] = useState(0); // 0: Check Phone, 1: Login Password, 2: Signup
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
   const router = useRouter();
   const setUser = useAuthStore((state) => state.setUser);
 
-  const handleAuth = async () => {
+  const handleCheckPhone = async () => {
     if (mobile.length < 10) {
       toast.error('Enter valid 10-digit phone');
       return;
@@ -65,18 +40,9 @@ export default function AuthPage() {
         .maybeSingle();
 
       if (profile) {
-        const hashed = await hashPassword(password);
-        if (profile.password === hashed) {
-          // Set secure user session cookie for Middleware
-          document.cookie = `user_session=${profile.id}; path=/; samesite=strict`;
-          setUser(profile);
-          toast.success(`Welcome back, ${profile.name}!`);
-          router.push('/');
-        } else {
-          toast.error('Incorrect password');
-        }
+        setStep(1); // User exists, ask for password
       } else {
-        setStep(2); // New User -> Signup
+        setStep(2); // New user, go to signup
       }
     } catch (err) {
       toast.error('Connection failed');
@@ -85,9 +51,37 @@ export default function AuthPage() {
     }
   };
 
+  const handleLogin = async () => {
+    if (!password) { toast.error('Enter password'); return; }
+    setLoading(true);
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('phone', mobile)
+        .maybeSingle();
+
+      if (profile) {
+        const hashed = await hashPassword(password);
+        if (profile.password === hashed) {
+          document.cookie = `user_session=${profile.id}; path=/; samesite=strict`;
+          setUser(profile);
+          toast.success(`Welcome back, ${profile.name}!`);
+          router.push('/');
+        } else {
+          toast.error('Incorrect password');
+        }
+      }
+    } catch (err) {
+      toast.error('Login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSignup = async () => {
-    if (!name || !address || !pincode || !securityAnswer || !password) {
-      toast.error('Please complete all security fields');
+    if (!name || !address || !pincode || !password) {
+      toast.error('Please complete all fields');
       return;
     }
     setLoading(true);
@@ -98,16 +92,13 @@ export default function AuthPage() {
         phone: mobile,
         address,
         pincode,
-        password: hashed,
-        security_question: securityQuestion,
-        security_answer: securityAnswer.toLowerCase().trim()
+        password: hashed
       }).select().single();
 
       if (error) throw error;
-      // Set secure user session cookie for Middleware
       document.cookie = `user_session=${data.id}; path=/; samesite=strict`;
       setUser(data);
-      toast.success('Secure account created!');
+      toast.success('Account created successfully!');
       router.push('/');
     } catch (err: any) {
       toast.error(err.message || 'Signup failed');
@@ -116,139 +107,110 @@ export default function AuthPage() {
     }
   };
 
-  const handleResetPassword = async () => {
-    setLoading(true);
-    try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('phone', mobile)
-        .single();
-
-      if (profile && profile.security_answer === securityAnswer.toLowerCase().trim()) {
-        const hashed = await hashPassword(password);
-        const { error } = await supabase
-          .from('profiles')
-          .update({ password: hashed })
-          .eq('id', profile.id);
-        
-        if (error) throw error;
-        toast.success('Identity verified. Password reset!');
-        setStep(1);
-      } else {
-        toast.error('Incorrect security answer');
-      }
-    } catch (err) {
-      toast.error('Identity not found');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const inputClass = "w-full bg-surface border border-transparent rounded-[24px] py-4.5 px-6 text-sm font-bold text-foreground outline-none focus:bg-white focus:border-primary/10 transition-all duration-300 shadow-sm";
+  const inputClass = "w-full bg-white/50 backdrop-blur-xl border border-white/50 rounded-2xl py-4 px-5 text-sm font-medium text-gray-900 placeholder-gray-500 outline-none focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all duration-300 shadow-sm";
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-primary/5 to-transparent" />
-      
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-sm space-y-8 relative z-10"
-      >
-        <button 
-          onClick={() => setStep(1)} 
-          className="p-3 bg-white rounded-2xl text-muted hover:text-foreground transition-colors border border-gray-100 shadow-sm active:scale-90"
-        >
-          <ArrowLeft size={18} strokeWidth={2.5} />
-        </button>
+    <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-orange-400/20 rounded-full blur-[100px] animate-pulse" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-rose-400/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
+      <div className="absolute top-[20%] right-[10%] w-[20%] h-[20%] bg-yellow-400/20 rounded-full blur-[80px] animate-pulse" style={{ animationDelay: '4s' }} />
 
-        <div className="bg-white border border-gray-100/60 p-8 rounded-[40px] space-y-7 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.1)]">
-          <div className="space-y-1">
-            <h2 className="text-xl font-black text-foreground uppercase tracking-tight">
-              {step === 1 ? 'Digital Entry' : step === 2 ? 'Identity Setup' : 'Recovery'}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="w-full max-w-md space-y-6 relative z-10"
+      >
+        <div className="flex items-center justify-between mb-2">
+          {step !== 0 && (
+            <button 
+              onClick={() => setStep(0)} 
+              className="p-3 bg-white/70 backdrop-blur-md rounded-full text-gray-600 hover:text-gray-900 hover:bg-white transition-all border border-white/60 shadow-sm active:scale-95"
+            >
+              <ArrowLeft size={18} strokeWidth={2.5} />
+            </button>
+          )}
+          <div className="flex items-center gap-2 mx-auto bg-white/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/60 shadow-sm">
+            <Sparkles size={16} className="text-orange-500" fill="currentColor" />
+            <span className="text-xs font-bold tracking-widest text-gray-800 uppercase">Orderlete Premium</span>
+          </div>
+          {step !== 0 && <div className="w-[42px]" />}
+        </div>
+
+        <div className="bg-white/70 backdrop-blur-2xl border border-white/80 p-8 sm:p-10 rounded-[2.5rem] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.08)]">
+          <div className="space-y-2 mb-8 text-center">
+            <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+              {step === 0 ? 'Welcome' : step === 1 ? 'Welcome Back' : 'Create Account'}
             </h2>
-            <p className="text-[11px] text-muted font-black uppercase tracking-widest opacity-60">
-              {step === 1 ? 'Marketplace Login' : step === 2 ? 'Initialize Profile' : 'System Verification'}
+            <p className="text-sm font-medium text-gray-500">
+              {step === 0 ? 'Enter your mobile to sign in or register' : step === 1 ? 'Enter your password' : 'Join to start ordering effortlessly'}
             </p>
           </div>
 
           <AnimatePresence mode="wait">
-            <motion.div key={step} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-              {step === 1 ? (
-                <div className="space-y-4">
-                   <div className="relative">
-                      <Phone size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400" strokeWidth={2.5} />
-                      <input type="tel" placeholder="Mobile" maxLength={10} className={`${inputClass} pl-14`} value={mobile} onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}/>
+            <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
+              {step === 0 ? (
+                <div className="space-y-5">
+                   <div className="relative group">
+                      <Phone size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
+                      <input type="tel" placeholder="Mobile Number" maxLength={10} className={`${inputClass} pl-12`} value={mobile} onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}/>
                    </div>
-                   <div className="relative">
-                      <Lock size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400" strokeWidth={2.5} />
-                      <input type={showPassword ? "text" : "password"} placeholder="Password" className={`${inputClass} pl-14 pr-14`} value={password} onChange={(e) => setPassword(e.target.value)}/>
-                      <button onClick={() => setShowPassword(!showPassword)} className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-300">
-                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                      </button>
-                   </div>
-                   <button onClick={handleAuth} disabled={loading} className="w-full bg-foreground text-white font-black py-4.5 rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2">
-                    {loading ? <Loader2 className="animate-spin" size={20} /> : 'PROCEED'}
-                   </button>
-                   <button onClick={() => setStep(3)} className="w-full text-[10px] font-black text-muted uppercase tracking-widest text-center hover:text-primary transition-colors">
-                      Trouble accessing?
+                   <button onClick={handleCheckPhone} disabled={loading} className="w-full bg-gradient-to-r from-orange-500 to-rose-500 text-white font-bold py-4 rounded-2xl shadow-[0_10px_20px_-10px_rgba(249,115,22,0.5)] hover:shadow-[0_15px_30px_-10px_rgba(249,115,22,0.6)] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                    {loading ? <Loader2 className="animate-spin" size={20} /> : 'Continue'}
                    </button>
                 </div>
-              ) : step === 2 ? (
-                <div className="space-y-4">
-                   <LocationPicker onLocationFound={(addr, pin) => { setAddress(addr); setPincode(pin); }} />
-                   <div className="space-y-3">
-                      <input type="text" placeholder="Full Name" className={inputClass} value={name} onChange={(e) => setName(e.target.value)} />
-                      <input type="text" placeholder="Pincode" className={inputClass} value={pincode} onChange={(e) => setPincode(e.target.value)} />
-                      <textarea placeholder="Delivery Address" className={`${inputClass} min-h-[80px] py-4`} value={address} onChange={(e) => setAddress(e.target.value)} />
-                      <input type="password" placeholder="Create Password" className={inputClass} value={password} onChange={(e) => setPassword(e.target.value)}/>
-                      
-                      <div className="pt-4 border-t border-gray-50 flex flex-col gap-3">
-                         <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Security Question</span>
-                         <select className={inputClass} value={securityQuestion} onChange={(e) => setSecurityQuestion(e.target.value)}>
-                            {SECURITY_QUESTIONS.map(q => <option key={q} value={q}>{q}</option>)}
-                         </select>
-                         <input type="text" placeholder="Your Answer" className={inputClass} value={securityAnswer} onChange={(e) => setSecurityAnswer(e.target.value)} />
-                      </div>
+              ) : step === 1 ? (
+                <div className="space-y-5">
+                   <div className="relative group">
+                      <Lock size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
+                      <input type={showPassword ? "text" : "password"} placeholder="Password" className={`${inputClass} pl-12 pr-12`} value={password} onChange={(e) => setPassword(e.target.value)}/>
+                      <button onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
                    </div>
-                   <button onClick={handleSignup} disabled={loading} className="w-full bg-primary text-white font-black py-4.5 rounded-2xl shadow-xl">
-                    {loading ? <Loader2 className="animate-spin mx-auto" size={20} /> : 'INITIALIZE ACCOUNT'}
+                   <button onClick={handleLogin} disabled={loading} className="w-full bg-gradient-to-r from-orange-500 to-rose-500 text-white font-bold py-4 rounded-2xl shadow-[0_10px_20px_-10px_rgba(249,115,22,0.5)] hover:shadow-[0_15px_30px_-10px_rgba(249,115,22,0.6)] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                    {loading ? <Loader2 className="animate-spin" size={20} /> : 'Login'}
                    </button>
+                   <div className="pt-4 text-center">
+                     <p className="text-xs font-semibold text-gray-500 hover:text-orange-500 transition-colors cursor-pointer" onClick={() => toast.success('Please contact support to reset password.')}>Forgot Password?</p>
+                   </div>
                 </div>
               ) : (
                 <div className="space-y-5">
-                   <div className="bg-blue-50/50 p-4 rounded-3xl space-y-3">
-                      <div className="flex items-center gap-2 text-blue-800">
-                         <ShieldAlert size={18} />
-                         <span className="text-[10px] font-black uppercase tracking-widest">Forgot Password?</span>
+                   <LocationPicker onLocationFound={(addr, pin) => { setAddress(addr); setPincode(pin); }} />
+                   <div className="space-y-4">
+                      <div className="relative group">
+                        <UserIcon size={18} className="absolute left-5 top-[18px] text-gray-400 group-focus-within:text-orange-500 transition-colors" />
+                        <input type="text" placeholder="Full Name" className={`${inputClass} pl-12`} value={name} onChange={(e) => setName(e.target.value)} />
                       </div>
-                      <p className="text-[11px] text-blue-800/60 font-bold leading-relaxed">Enter your phone and answer the security question you set during signup.</p>
-                   </div>
-                   
-                   <input type="tel" placeholder="Mobile" className={inputClass} value={mobile} onChange={(e) => setMobile(e.target.value)}/>
-                   <select className={inputClass} value={securityQuestion} onChange={(e) => setSecurityQuestion(e.target.value)}>
-                     {SECURITY_QUESTIONS.map(q => <option key={q} value={q}>{q}</option>)}
-                   </select>
-                   <input type="text" placeholder="Secret Answer" className={inputClass} value={securityAnswer} onChange={(e) => setSecurityAnswer(e.target.value)} />
-                   <input type="password" placeholder="New Password" className={inputClass} value={password} onChange={(e) => setPassword(e.target.value)}/>
-                   
-                   <button onClick={handleResetPassword} disabled={loading} className="w-full bg-gray-900 text-white font-black py-4.5 rounded-2xl shadow-xl active:scale-95 transition-all">
-                    {loading ? <Loader2 className="animate-spin mx-auto" size={20} /> : 'VERIFY & RESET'}
-                   </button>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="relative group">
+                          <Hash size={18} className="absolute left-5 top-[18px] text-gray-400 group-focus-within:text-orange-500 transition-colors" />
+                          <input type="text" placeholder="Pincode" className={`${inputClass} pl-12`} value={pincode} onChange={(e) => setPincode(e.target.value)} />
+                        </div>
+                        <div className="relative group">
+                           <Phone size={18} className="absolute left-5 top-[18px] text-gray-400 group-focus-within:text-orange-500 transition-colors" />
+                           <input type="tel" placeholder="Mobile" maxLength={10} className={`${inputClass} pl-12`} value={mobile} disabled />
+                        </div>
+                      </div>
 
-                   <div className="pt-6 border-t border-gray-50 text-center space-y-4">
-                      <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Still can't access?</p>
-                      <CallAction 
-                        title="Identity Helpdesk"
-                        trigger={
-                          <div className="flex items-center justify-center gap-3 bg-emerald-50 text-emerald-600 py-4 rounded-2xl border border-emerald-100 hover:bg-emerald-100 active:scale-95 transition-all cursor-pointer">
-                             <PhoneCall size={18} strokeWidth={2.5} />
-                             <span className="text-[11px] font-black uppercase tracking-widest leading-none">Call Office Helpdesk</span>
-                          </div>
-                        }
-                      />
+                      <div className="relative group">
+                        <MapPin size={18} className="absolute left-5 top-[18px] text-gray-400 group-focus-within:text-orange-500 transition-colors" />
+                        <textarea placeholder="Complete Delivery Address" className={`${inputClass} pl-12 min-h-[80px]`} value={address} onChange={(e) => setAddress(e.target.value)} />
+                      </div>
+                      
+                      <div className="relative group">
+                        <Lock size={18} className="absolute left-5 top-[18px] text-gray-400 group-focus-within:text-orange-500 transition-colors" />
+                        <input type={showPassword ? "text" : "password"} placeholder="Create Password" className={`${inputClass} pl-12 pr-12`} value={password} onChange={(e) => setPassword(e.target.value)}/>
+                        <button onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-[18px] text-gray-400 hover:text-gray-600 transition-colors">
+                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
                    </div>
+                   <button onClick={handleSignup} disabled={loading} className="w-full bg-gradient-to-r from-orange-500 to-rose-500 text-white font-bold py-4 rounded-2xl shadow-[0_10px_20px_-10px_rgba(249,115,22,0.5)] hover:shadow-[0_15px_30px_-10px_rgba(249,115,22,0.6)] active:scale-[0.98] transition-all">
+                    {loading ? <Loader2 className="animate-spin mx-auto" size={20} /> : 'Complete Registration'}
+                   </button>
                 </div>
               )}
             </motion.div>
