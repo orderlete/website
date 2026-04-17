@@ -72,7 +72,7 @@ export default function Header({ searchQuery, setSearchQuery, placeholder = "Sea
       {/* Top Banner - Mini */}
       {storeStatus === 'closed' ? (
         <div className="bg-red-500 text-white px-5 py-2.5 flex items-center justify-center overflow-hidden relative">
-           <span className="text-[11px] font-black uppercase tracking-[0.2em]">Store is temporarily closed. Will open soon!</span>
+           <span className="text-[11px] font-black uppercase tracking-[0.2em]">Store is currently closed.</span>
         </div>
       ) : (
         <div className="bg-gray-900 text-white px-5 py-2.5 flex items-center justify-between overflow-hidden relative">

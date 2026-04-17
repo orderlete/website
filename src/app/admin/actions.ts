@@ -8,22 +8,46 @@ export async function updateOrderStatusAdmin(id: string, status: string) {
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!supabaseUrl || !supabaseServiceKey) {
-      return { success: false, error: `Missing Admin Keys. Key exists? ${!!supabaseServiceKey}` };
+      return { success: false, error: 'Missing Admin Keys' };
     }
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { data, error } = await supabaseAdmin
+    // 1. Update the order
+    const { data: updatedOrder, error } = await supabaseAdmin
       .from('orders')
       .update({ status })
       .eq('id', id)
-      .select();
+      .select()
+      .single();
       
-    if (error) {
-      return { success: false, error: error.message };
+    if (error) return { success: false, error: error.message };
+
+    // 2. Automate Push Notification
+    const titles: Record<string, string> = {
+      'confirmed': 'Order Confirmed! 🎊',
+      'shipped': 'Order Shipped! 🚚',
+      'delivered': 'Delivered! 🍕',
+      'cancelled': 'Order Cancelled 🛑',
+    };
+
+    const messages: Record<string, string> = {
+      'confirmed': 'The store has confirmed your order. We are preparing it now.',
+      'shipped': 'Your order is on the way! Our rider is racing to your location.',
+      'delivered': 'Enjoy your treats! Please rate your experience in the app.',
+      'cancelled': 'We are sorry, your order was cancelled. Contact support for help.',
+    };
+
+    if (titles[status]) {
+      await supabaseAdmin.from('notifications').insert({
+        title: titles[status],
+        message: messages[status],
+        type: status === 'cancelled' ? 'alert' : 'info',
+        user_id: updatedOrder.user_id, // Targeting specific user
+      });
     }
     
-    return { success: true, data };
+    return { success: true, data: updatedOrder };
   } catch (err: any) {
     return { success: false, error: err.message || 'Unknown Server Error' };
   }

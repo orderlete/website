@@ -238,7 +238,9 @@ export default function ProfilePage() {
                           </div>
                           <span className={cn(
                              "px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border",
-                             order.status === 'delivered' ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-blue-50 text-blue-600 border-blue-100"
+                             order.status === 'delivered' ? "bg-emerald-50 text-emerald-600 border-emerald-100" : 
+                             order.status === 'cancelled' ? "bg-red-50 text-red-600 border-red-100" :
+                             "bg-blue-50 text-blue-600 border-blue-100"
                           )}>
                              {order.status}
                           </span>
