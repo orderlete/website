@@ -35,21 +35,14 @@ export default function BottomNav() {
               href={item.href}
               className={cn(
                 "flex items-center justify-center transition-all duration-300 relative py-4 px-5 rounded-2xl",
-                isActive ? "text-primary scale-125 bg-primary/5" : "text-gray-400 hover:text-gray-600"
+                isActive ? "text-primary scale-110" : "text-gray-400 hover:text-gray-600"
               )}
             >
-              <div className="relative">
-                <item.icon 
-                  size={24} 
-                  strokeWidth={isActive ? 3 : 2} 
-                  className="transition-transform"
-                />
-                
-                {/* Active Indicator Dot */}
-                {isActive && (
-                  <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-primary rounded-full shadow-lg shadow-primary/40" />
-                )}
-              </div>
+              <item.icon 
+                size={22} 
+                strokeWidth={isActive ? 2.5 : 1.5} 
+                className="transition-transform"
+              />
             </Link>
           );
         })}
