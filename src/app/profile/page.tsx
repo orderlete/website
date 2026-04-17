@@ -57,8 +57,8 @@ export default function ProfilePage() {
       return;
     }
     fetchOrders();
-    setEditName(user.name);
-    setEditAddress(user.address);
+    setEditName(user.name || '');
+    setEditAddress(user.address || '');
     setEditPincode(user.pincode || '');
   }, [user]);
 
