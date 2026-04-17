@@ -41,6 +41,10 @@
   --color-surface: var(--surface);
 }
 
+html {
+  font-size: 14.5px;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
