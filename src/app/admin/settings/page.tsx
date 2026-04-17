@@ -11,7 +11,8 @@ import {
   Clock, 
   Loader2,
   CheckCircle2,
-  PhoneCall
+  PhoneCall,
+  Lock
 } from 'lucide-react';
 import { cn, hashPassword } from '@/lib/utils';
 import toast from 'react-hot-toast';
