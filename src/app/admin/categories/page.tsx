@@ -22,7 +22,9 @@ export default function AdminCategories() {
     name: '',
     image_url: '',
     section: 'confectionary',
-    display_order: 0
+    display_order: 0,
+    is_featured: false,
+    featured_priority: '0'
   });
 
   useEffect(() => {
@@ -44,13 +46,17 @@ export default function AdminCategories() {
     }
 
     setLoading(true);
-    const { error } = await supabase.from('categories').insert(formData);
+    const payload = {
+      ...formData,
+      featured_priority: parseInt(formData.featured_priority) || 0
+    };
+    const { error } = await supabase.from('categories').insert(payload);
     
     if (error) {
       toast.error('Failed to add category');
     } else {
       toast.success('Category added!');
-      setFormData({ name: '', image_url: '', section: 'confectionary', display_order: categories.length });
+      setFormData({ name: '', image_url: '', section: 'confectionary', display_order: categories.length, is_featured: false, featured_priority: '0' });
       fetchCategories();
     }
     setLoading(false);
@@ -118,6 +124,23 @@ export default function AdminCategories() {
                        <option value="confectionary">🍰 Confectionary (Cakes)</option>
                        <option value="medical">💊 Medical (Pharma)</option>
                     </select>
+                 </div>
+                 
+                 <div className="space-y-4 pt-4 border-t border-gray-100">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Featured & Ranking</label>
+                    <div className="flex flex-col gap-4">
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <div className={cn("w-10 h-6 flex items-center rounded-full p-1 transition-colors", formData.is_featured ? "bg-primary" : "bg-gray-200")}>
+                          <div className={cn("bg-white w-4 h-4 rounded-full shadow-md transform transition-transform", formData.is_featured ? "translate-x-4" : "translate-x-0")} />
+                        </div>
+                        <span className="text-xs font-bold text-gray-900 uppercase">Is Featured</span>
+                        <input type="checkbox" checked={formData.is_featured} onChange={e => setFormData({...formData, is_featured: e.target.checked})} className="hidden" />
+                      </label>
+                      <div className={cn("transition-opacity", formData.is_featured ? "opacity-100" : "opacity-30 pointer-events-none")}>
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Priority (1 = First)</label>
+                        <input type="number" min="0" value={formData.featured_priority} onChange={e => setFormData({...formData, featured_priority: e.target.value})} placeholder="0" className="w-full bg-gray-50 rounded-2xl py-3 px-4 text-xs font-bold focus:bg-white outline-none mt-1" />
+                      </div>
+                    </div>
                  </div>
               </div>
 

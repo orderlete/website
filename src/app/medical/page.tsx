@@ -36,13 +36,19 @@ export default function MedicalPage() {
           .from('categories')
           .select('*')
           .eq('section', 'medical')
+          .order('is_featured', { ascending: false })
+          .order('featured_priority', { ascending: true })
           .order('display_order');
         if (cats && cats.length > 0) setCategories(cats);
 
         const { data, error } = await supabase
           .from('products')
           .select('*')
-          .contains('categories', ['medical']);
+          .contains('categories', ['medical'])
+          .order('is_featured', { ascending: false })
+          .order('featured_priority', { ascending: true })
+          .order('sales_count', { ascending: false })
+          .order('created_at', { ascending: false });
 
         let finalProducts = [];
         if (error || !data || data.length === 0) {

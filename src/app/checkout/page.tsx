@@ -94,6 +94,18 @@ export default function CheckoutPage() {
       const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
       if (itemsError) throw itemsError;
 
+      // 3. Increment Sales Count Asynchronously
+      try {
+        Promise.all(items.map(async (item) => {
+          const { data: prodData } = await supabase.from('products').select('sales_count').eq('id', item.id).single();
+          if (prodData) {
+            await supabase.from('products').update({ sales_count: (prodData.sales_count || 0) + item.quantity }).eq('id', item.id);
+          }
+        }));
+      } catch (e) {
+        // Do not block checkout if sales increment fails
+      }
+
       setSuccess(true);
       clearCart();
       toast.success('Order placed successfully!', { icon: '🎉' });

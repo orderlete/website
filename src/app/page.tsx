@@ -38,10 +38,17 @@ export default function Home() {
           if (banner) setBannerText(banner);
         }
 
-        const { data: cats } = await supabase.from('categories').select('*').eq('section', 'confectionary').order('display_order');
+        const { data: cats } = await supabase.from('categories').select('*').eq('section', 'confectionary')
+          .order('is_featured', { ascending: false })
+          .order('featured_priority', { ascending: true })
+          .order('display_order');
         if (cats && cats.length > 0) setCategories(cats);
 
-        const { data, error } = await supabase.from('products').select('*').contains('categories', ['confectionary']);
+        const { data, error } = await supabase.from('products').select('*').contains('categories', ['confectionary'])
+          .order('is_featured', { ascending: false })
+          .order('featured_priority', { ascending: true })
+          .order('sales_count', { ascending: false })
+          .order('created_at', { ascending: false });
         
         let finalProducts = [];
         if (error || !data || data.length === 0) {
