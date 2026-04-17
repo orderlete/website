@@ -47,30 +47,29 @@ export default function GlobalLoader({ children }: { children: React.ReactNode }
           className="fixed inset-0 bg-white z-[9999] flex flex-col items-center justify-center p-6 touch-none"
         >
           <motion.div 
-            className="flex flex-col items-center gap-6"
+            className="flex flex-col items-center justify-center relative w-40 h-40"
           >
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="w-32 h-32 flex items-center justify-center relative"
-            >
-               <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
-            </motion.div>
-            
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.8 }}
-              className="flex flex-col items-center gap-2"
-            >
-              <h1 className="text-2xl font-black text-gray-900 tracking-tight">ORDERLETE</h1>
-              <div className="flex items-center gap-1 opacity-40">
-                 <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                 <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                 <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-              </div>
-            </motion.div>
+             {/* Spinning Ring */}
+             <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                className="absolute inset-0 border-t-2 border-r-2 border-transparent border-t-primary rounded-full"
+             />
+             <motion.div
+                animate={{ rotate: -360 }}
+                transition={{ repeat: Infinity, duration: 2.5, ease: "linear" }}
+                className="absolute inset-2 border-b-2 border-l-2 border-transparent border-b-primary/40 rounded-full"
+             />
+             
+             {/* Center Logo */}
+             <motion.div 
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="w-20 h-20 relative z-10"
+             >
+                <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+             </motion.div>
           </motion.div>
         </motion.div>
       ) : (

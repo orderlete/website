@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Cake, BriefcaseMedical, ShoppingCart, User, Heart } from 'lucide-react';
@@ -22,10 +22,31 @@ export default function BottomNav() {
   const hideOnPaths = ['/checkout', '/auth', '/admin', '/product/', '/cart'];
   const shouldHide = !pathname || hideOnPaths.some(p => pathname.startsWith(p));
 
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        setIsVisible(false); // scrolling down
+      } else {
+        setIsVisible(true); // scrolling up
+      }
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
   if (shouldHide) return null;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 px-6 pb-6 pointer-events-none">
+    <nav className={cn(
+      "fixed bottom-0 left-0 right-0 z-50 px-6 pb-6 pointer-events-none transition-transform duration-500 ease-in-out",
+      !isVisible && "translate-y-[200%]"
+    )}>
       <div className="max-w-md mx-auto h-[76px] bg-white border border-gray-100 rounded-[32px] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.12)] flex items-center justify-around px-4 pointer-events-auto relative overflow-hidden">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
