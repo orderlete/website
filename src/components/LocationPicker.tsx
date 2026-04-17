@@ -30,13 +30,19 @@ export default function LocationPicker({ onLocationFound, className }: LocationP
         try {
           const { latitude, longitude } = position.coords;
           
-          // 1. Reverse Geocoding using OpenStreetMap (Free, no API key needed for low usage)
+          // 1. Reverse Geocoding using OpenStreetMap
+          // Added User-Agent header as required by OSM Nominatim usage policy
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+            {
+              headers: {
+                'User-Agent': 'Orderlete/1.0 (App; Mobile Delivery)'
+              }
+            }
           );
           const data = await response.json();
           
-          const pincode = data.address.postcode;
+          const pincode = data.address?.postcode || data.address?.zip;
           const address = data.display_name;
 
           if (!pincode) {
@@ -46,11 +52,9 @@ export default function LocationPicker({ onLocationFound, className }: LocationP
           }
 
           setStatus('verifying');
-          
-          // ALWAYS return the address to allow manual editing
           onLocationFound(address, pincode);
 
-          // 2. Check Serviceability in Supabase
+          // 2. Check Serviceability
           const { data: zone, error } = await supabase
             .from('serviceable_zones')
             .select('*')
@@ -64,7 +68,6 @@ export default function LocationPicker({ onLocationFound, className }: LocationP
             return;
           }
 
-          // 3. Success
           setStatus('success');
           onLocationFound(address, pincode);
           toast.success(`Broadcasting from ${zone.area_name}!`, { icon: '🚀' });
@@ -81,7 +84,13 @@ export default function LocationPicker({ onLocationFound, className }: LocationP
         setLoading(false);
         setStatus('error');
         if (error.code === 1) toast.error('Permission denied. Please allow location access.');
+        else if (error.code === 3) toast.error('Location request timed out. Try again.');
         else toast.error('Could not detect location');
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
       }
     );
   };
