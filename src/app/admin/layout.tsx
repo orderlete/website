@@ -21,7 +21,7 @@ import {
   X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { updateStoreStatusAdmin } from './actions';
