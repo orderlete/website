@@ -117,8 +117,8 @@ export default function CheckoutPage() {
         </motion.div>
         
         <div className="space-y-2">
-           <h1 className="text-3xl font-black text-foreground">ORDER CONFIRMED</h1>
-           <p className="text-muted font-bold text-sm px-4">Your order has been successfully placed.</p>
+           <h1 className="text-3xl font-black text-foreground">ORDER RECEIVED</h1>
+           <p className="text-muted font-bold text-sm px-4">Your order has been successfully placed. Waiting for store confirmation.</p>
         </div>
 
         <button 

@@ -18,6 +18,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 interface Notification {
   id: string;
@@ -30,6 +31,7 @@ interface Notification {
 
 export default function Header({ searchQuery, setSearchQuery, placeholder = "Search snacks, drinks..." }: any) {
   const { user } = useAuthStore();
+  const { storeStatus } = useSettingsStore();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -68,14 +70,20 @@ export default function Header({ searchQuery, setSearchQuery, placeholder = "Sea
   return (
     <div className="sticky top-0 z-50 bg-white">
       {/* Top Banner - Mini */}
-      <div className="bg-gray-900 text-white px-5 py-2.5 flex items-center justify-between overflow-hidden relative">
-         <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-            <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-80">Live Tracking Enabled</span>
-         </div>
-         <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-50">Express Delivery</span>
-         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/20 to-transparent pointer-events-none" />
-      </div>
+      {storeStatus === 'closed' ? (
+        <div className="bg-red-500 text-white px-5 py-2.5 flex items-center justify-center overflow-hidden relative">
+           <span className="text-[11px] font-black uppercase tracking-[0.2em]">Store is temporarily closed. Will open soon!</span>
+        </div>
+      ) : (
+        <div className="bg-gray-900 text-white px-5 py-2.5 flex items-center justify-between overflow-hidden relative">
+           <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-80">Live Tracking Enabled</span>
+           </div>
+           <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-50">Express Delivery</span>
+           <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/20 to-transparent pointer-events-none" />
+        </div>
+      )}
 
       <header className="px-5 py-5 border-b border-gray-50 flex flex-col gap-5 bg-white/95 backdrop-blur-xl">
         <div className="flex items-center justify-between">

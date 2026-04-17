@@ -23,6 +23,8 @@ import {
 import { cn } from '@/lib/utils';
 import { Toaster } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSettingsStore } from '@/store/useSettingsStore';
+import { updateStoreStatusAdmin } from './actions';
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/admin' },
@@ -40,6 +42,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const [isAuth, setIsAuth] = useState<boolean | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { storeStatus, fetchStatus } = useSettingsStore();
+  const [isTogglingStore, setIsTogglingStore] = useState(false);
+
+  useEffect(() => {
+    fetchStatus();
+  }, []);
 
   useEffect(() => {
     // Check authentication via cookie (recognized by Middleware)
@@ -57,6 +65,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     // Clear the auth cookie
     document.cookie = "admin_authorized=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     router.push('/admin/login');
+  };
+
+  const handleToggleStoreStatus = async () => {
+    setIsTogglingStore(true);
+    const newStatus = storeStatus === 'open' ? 'closed' : 'open';
+    const res = await updateStoreStatusAdmin(newStatus);
+    if (res.success) {
+      await fetchStatus();
+      toast.success(`Store is now ${newStatus}`);
+    } else {
+      toast.error('Failed to change store status');
+    }
+    setIsTogglingStore(false);
   };
 
   if (pathname === '/admin/login') {
@@ -183,6 +204,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
            </div>
 
            <div className="flex items-center gap-3 lg:gap-6">
+              <button 
+                onClick={handleToggleStoreStatus}
+                disabled={isTogglingStore}
+                className={cn(
+                  "relative px-4 py-2 rounded-xl transition-all flex items-center gap-2",
+                  storeStatus === 'open' ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100" : "bg-red-50 text-red-600 hover:bg-red-100"
+                )}
+              >
+                 <div className={cn("w-2 h-2 rounded-full", storeStatus === 'open' ? "bg-emerald-500 animate-pulse" : "bg-red-500")} />
+                 <span className="text-[11px] font-black uppercase tracking-widest leading-none hidden sm:block">
+                   {isTogglingStore ? 'WAIT...' : storeStatus === 'open' ? 'STORE OPEN' : 'STORE CLOSED'}
+                 </span>
+              </button>
+
               <button className="relative p-2.5 text-gray-400 hover:bg-gray-50 rounded-xl transition-all">
                  <Bell size={20} strokeWidth={2.5} />
                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
