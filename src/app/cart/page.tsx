@@ -77,7 +77,7 @@ export default function CartPage() {
                     <div className="min-w-0">
                        <h3 className="font-black text-gray-900 text-[15px] truncate pr-4">{item.name}</h3>
                        <p className="text-[9px] text-gray-400 font-black uppercase tracking-widest mt-0.5">
-                          {Array.isArray(item.categories) ? item.categories[0] : (item as any).category}
+                          {item.category}
                        </p>
                     </div>
                     <button 
