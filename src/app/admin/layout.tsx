@@ -42,8 +42,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const authStatus = sessionStorage.getItem('admin_authenticated');
-    if (authStatus !== 'true' && pathname !== '/admin/login') {
+    // Check authentication via cookie (recognized by Middleware)
+    const isAuth = document.cookie.includes('admin_authorized=true');
+    if (!isAuth && pathname !== '/admin/login') {
       router.push('/admin/login');
     } else {
       setIsAuth(true);
@@ -53,7 +54,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [pathname, router]);
 
   const handleLogout = () => {
-    sessionStorage.removeItem('admin_authenticated');
+    // Clear the auth cookie
+    document.cookie = "admin_authorized=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     router.push('/admin/login');
   };
 

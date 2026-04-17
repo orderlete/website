@@ -6,6 +6,7 @@ import { Lock, ShieldCheck, ArrowRight, Loader2, AppWindow } from 'lucide-react'
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
+import { hashPassword } from '@/lib/utils';
 
 export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
@@ -24,14 +25,16 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
+      const hashed = await hashPassword(password);
       const { data } = await supabase
         .from('settings')
         .select('value')
         .eq('key', 'admin_password')
         .single();
 
-      if (data && data.value === password) {
-        sessionStorage.setItem('admin_authenticated', 'true');
+      if (data && data.value === hashed) {
+        // Set secure session cookie
+        document.cookie = "admin_authorized=true; path=/; samesite=strict";
         toast.success('Identity verified. Master Console Access Granted.');
         router.push('/admin');
       } else {

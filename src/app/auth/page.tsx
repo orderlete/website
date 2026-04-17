@@ -25,6 +25,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import LocationPicker from '@/components/LocationPicker';
 import CallAction from '@/components/CallAction';
+import { hashPassword } from '@/lib/utils';
 
 const SECURITY_QUESTIONS = [
   "What was your first pet's name?",
@@ -64,7 +65,8 @@ export default function AuthPage() {
         .maybeSingle();
 
       if (profile) {
-        if (profile.password && profile.password.trim() === password.trim()) {
+        const hashed = await hashPassword(password);
+        if (profile.password === hashed) {
           setUser(profile);
           toast.success(`Welcome back, ${profile.name}!`);
           router.push('/');
@@ -88,12 +90,13 @@ export default function AuthPage() {
     }
     setLoading(true);
     try {
+      const hashed = await hashPassword(password);
       const { data, error } = await supabase.from('profiles').insert({
         name,
         phone: mobile,
         address,
         pincode,
-        password,
+        password: hashed,
         security_question: securityQuestion,
         security_answer: securityAnswer.toLowerCase().trim()
       }).select().single();
@@ -119,9 +122,10 @@ export default function AuthPage() {
         .single();
 
       if (profile && profile.security_answer === securityAnswer.toLowerCase().trim()) {
+        const hashed = await hashPassword(password);
         const { error } = await supabase
           .from('profiles')
-          .update({ password: password })
+          .update({ password: hashed })
           .eq('id', profile.id);
         
         if (error) throw error;

@@ -13,7 +13,7 @@ import {
   CheckCircle2,
   PhoneCall
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, hashPassword } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
 export default function SettingsAdmin() {
@@ -149,7 +149,8 @@ export default function SettingsAdmin() {
                            if(!val) return toast.error('Key cannot be empty');
                            setSaving(true);
                            try {
-                              const { error } = await supabase.from('settings').update({ value: val }).eq('key', 'admin_password');
+                              const hashed = await hashPassword(val);
+                              const { error } = await supabase.from('settings').update({ value: hashed }).eq('key', 'admin_password');
                               if(!error) toast.success('Master Key Rotated');
                               else throw error;
                            } catch(e) { toast.error('Rotation Failed'); }
