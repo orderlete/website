@@ -91,10 +91,10 @@ export default function GlobalLoader({ children }: { children: React.ReactNode }
                 ))}
               </div>
               <motion.p
-                initial={{ opacity: 0, tracking: '1em' }}
-                animate={{ opacity: 0.4, tracking: '0.4em' }}
-                transition={{ delay: 1, duration: 1 }}
-                className="text-[10px] font-black text-white uppercase"
+                initial={{ opacity: 0, letterSpacing: '1.5em' }}
+                animate={{ opacity: 0.4, letterSpacing: '0.4em' }}
+                transition={{ delay: 1, duration: 1.5, ease: "easeOut" }}
+                className="text-[10px] font-black text-white uppercase ml-[0.4em]"
               >
                 Beyond Rapid Delivery
               </motion.p>
