@@ -4,21 +4,33 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 1. Admin Route Protection
-  if (pathname.startsWith('/admin')) {
-    // Skip protection for the login page itself
-    if (pathname === '/admin/login') {
-      return NextResponse.next();
-    }
+  // 1. PUBLIC ROUTES (Always accessible)
+  const isPublicRoute = 
+    pathname === '/auth' || 
+    pathname === '/admin/login' || 
+    pathname.startsWith('/api/') || // Assuming APIs have their own auth
+    pathname.includes('.') ||        // Assets like logo.png, favicon.ico
+    pathname.startsWith('/_next');   // Next.js internals
 
-    // Check for admin session
-    // NOTE: This uses a simple cookie for demonstration. 
-    // In production, use Supabase JWT validation.
+  // 2. ADMIN PROTECTION
+  if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
     const adminSession = request.cookies.get('admin_authorized');
-
     if (!adminSession || adminSession.value !== 'true') {
       const url = request.nextUrl.clone();
       url.pathname = '/admin/login';
+      return NextResponse.redirect(url);
+    }
+  }
+
+  // 3. GLOBAL USER PROTECTION (Strict Auth)
+  if (!isPublicRoute && !pathname.startsWith('/admin')) {
+    // Check for user session in cookie 
+    // (We should update the AuthPage to set this cookie)
+    const userSession = request.cookies.get('user_session');
+    
+    if (!userSession) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/auth';
       return NextResponse.redirect(url);
     }
   }
@@ -27,5 +39,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };

@@ -9,7 +9,9 @@ export const MOCK_PRODUCTS: Product[] = [
     image_url: "https://images.unsplash.com/photo-1614707267537-b85600e42ec1?w=800&q=80",
     description: "Cloud-like red velvet sponge topped with silky cream cheese frosting.",
     stock: 20,
-    tags: ["Popular", "Fresh"]
+    tags: ["Popular", "Fresh"],
+    rating: 4.8,
+    review_count: 124
   },
   {
     id: "c2",
@@ -19,7 +21,9 @@ export const MOCK_PRODUCTS: Product[] = [
     image_url: "https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=800&q=80",
     description: "Indulgent Belgian dark chocolate truffles with a gooey core.",
     stock: 15,
-    tags: ["Best Seller"]
+    tags: ["Best Seller"],
+    rating: 4.9,
+    review_count: 86
   },
   {
     id: "c3",
@@ -39,7 +43,9 @@ export const MOCK_PRODUCTS: Product[] = [
     image_url: "https://images.unsplash.com/photo-1551024601-bec78aea704b?w=800&q=80",
     description: "Soft donut glazed with real wild forest berry reduction.",
     stock: 30,
-    tags: ["Popular"]
+    tags: ["Popular"],
+    rating: 4.6,
+    review_count: 42
   },
   {
     id: "m1",
@@ -48,7 +54,9 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 250,
     image_url: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&q=80",
     description: "Effective pain reliever and fever reducer for adults.",
-    stock: 100
+    stock: 100,
+    rating: 4.7,
+    review_count: 230
   },
   {
     id: "m2",
@@ -57,7 +65,9 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 1599,
     image_url: "https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=800&q=80",
     description: "Immune system support capsules with Zinc and Vitamin D.",
-    stock: 50
+    stock: 50,
+    rating: 4.5,
+    review_count: 15
   },
   {
     id: "m3",
@@ -75,6 +85,8 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 120,
     image_url: "https://images.unsplash.com/photo-1583947215259-38e31be8751f?w=800&q=80",
     description: "Effective solution for cleaning wounds and skin disinfection.",
-    stock: 40
+    stock: 40,
+    rating: 4.2,
+    review_count: 8
   }
 ];

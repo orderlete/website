@@ -102,6 +102,8 @@ export default function AuthPage() {
       }).select().single();
 
       if (error) throw error;
+      // Set secure user session cookie for Middleware
+      document.cookie = `user_session=${data.id}; path=/; samesite=strict`;
       setUser(data);
       toast.success('Secure account created!');
       router.push('/');

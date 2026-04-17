@@ -156,8 +156,9 @@ export default function ProfilePage() {
     }
   };
 
-  const handleLogout = async () => {
-    localStorage.removeItem('auth-storage');
+  const handleLogout = () => {
+    // Clear user session cookie for Middleware
+    document.cookie = "user_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     setUser(null);
     router.push('/auth');
     toast.success('Session End');

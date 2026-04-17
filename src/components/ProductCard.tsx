@@ -28,12 +28,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             fill
             className="object-cover transition-transform duration-700 group-hover:scale-110"
           />
-          <div className="absolute top-3 right-3 flex flex-col gap-2">
-            <div className="bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm border border-black/5">
-              <Star size={10} fill="#f59e0b" className="text-secondary" strokeWidth={3} />
-              <span className="text-[10px] font-black text-gray-900">{product.rating || '4.5'}</span>
-            </div>
-          </div>
+           <div className="absolute top-3 right-3 flex flex-col gap-2">
+            {product.review_count && product.review_count > 0 ? (
+              <div className="bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm border border-black/5">
+                <Star size={10} fill="#f59e0b" className="text-secondary" strokeWidth={3} />
+                <span className="text-[10px] font-black text-gray-900">{product.rating?.toFixed(1) || '0.0'}</span>
+              </div>
+            ) : (
+              <div className="bg-emerald-600/90 backdrop-blur-md px-3 py-1 rounded-full flex items-center shadow-lg border border-white/20">
+                <span className="text-[8px] font-black text-white uppercase tracking-widest">Fresh Arrival</span>
+              </div>
+            )}
+           </div>
           
           {/* Quick Add Overlay on Hover */}
           <div className="absolute inset-x-0 bottom-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
