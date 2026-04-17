@@ -9,7 +9,8 @@ import {
   ShieldCheck, 
   Loader2, 
   Clock, 
-  ExternalLink 
+  ExternalLink,
+  ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
