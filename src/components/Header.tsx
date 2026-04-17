@@ -192,14 +192,8 @@ export default function Header({ searchQuery, setSearchQuery, placeholder = "Sea
                   )}
                </div>
                
-               <div className="p-8 border-t border-gray-50">
-                  <div className="bg-gray-900 p-5 rounded-[24px] space-y-3">
-                     <div className="flex items-center gap-3">
-                        <Sparkles size={16} className="text-orange-400" />
-                        <span className="text-[11px] font-black text-white uppercase tracking-widest">Orderlete Gold</span>
-                     </div>
-                     <p className="text-[10px] text-gray-500 font-bold leading-relaxed">Upgrade to get free delivery on every order and exclusive surprise treats.</p>
-                  </div>
+               <div className="p-8 border-t border-gray-50 opacity-20">
+                  <p className="text-[10px] text-gray-400 font-bold text-center">End of notifications</p>
                </div>
             </motion.div>
           </div>

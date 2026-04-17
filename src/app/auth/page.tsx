@@ -132,7 +132,7 @@ export default function AuthPage() {
           )}
           <div className="flex items-center gap-2 mx-auto bg-white/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/60 shadow-sm">
             <Sparkles size={16} className="text-orange-500" fill="currentColor" />
-            <span className="text-xs font-bold tracking-widest text-gray-800 uppercase">Orderlete Premium</span>
+            <span className="text-xs font-bold tracking-widest text-gray-800 uppercase">Orderlete</span>
           </div>
           {step !== 0 && <div className="w-[42px]" />}
         </div>

@@ -3,13 +3,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, Sparkles } from 'lucide-react';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 export default function GlobalLoader({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
 
+  const { fetchStatus } = useSettingsStore();
+
   useEffect(() => {
     setMounted(true);
+    fetchStatus(); // Ensure store status is loaded
     
     // Check if splash has already been shown in this session
     let hasShownSplash = false;

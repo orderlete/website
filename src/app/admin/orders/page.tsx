@@ -140,6 +140,7 @@ export default function AdminOrders() {
                <button onClick={() => updateStatus(order.id, 'confirmed')} className="bg-orange-50 text-orange-600 text-[10px] font-black p-4 rounded-xl border border-orange-100 active:scale-95 transition-all">CONFIRM</button>
                <button onClick={() => updateStatus(order.id, 'shipped')} className="bg-purple-50 text-purple-600 text-[10px] font-black p-4 rounded-xl border border-purple-100 active:scale-95 transition-all">SHIP</button>
                <button onClick={() => updateStatus(order.id, 'delivered')} className="bg-emerald-600 text-white text-[10px] font-black p-4 rounded-xl shadow-lg shadow-emerald-100 col-span-2 active:scale-95 transition-all">MARK DELIVERED</button>
+               <button onClick={() => updateStatus(order.id, 'cancelled')} className="bg-red-50 text-red-600 text-[10px] font-black p-4 rounded-xl border border-red-100 col-span-2 active:scale-95 transition-all">CANCEL ORDER</button>
             </div>
          </div>
       </div>

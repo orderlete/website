@@ -32,9 +32,11 @@ export const useCartStore = create<CartStore>()(
     (set, get) => ({
       items: [],
       addItem: (product) => {
+        if (product.stock <= 0) return;
         const currentItems = get().items;
         const existingItem = currentItems.find((item) => item.id === product.id);
         if (existingItem) {
+          if (existingItem.quantity >= product.stock) return;
           set({
             items: currentItems.map((item) =>
               item.id === product.id

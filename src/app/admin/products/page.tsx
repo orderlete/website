@@ -293,9 +293,21 @@ export default function AdminProducts() {
                              {p.subtitle && <div className="bg-primary/90 text-white px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest">{p.subtitle}</div>}
                           </div>
                           <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                             <button onClick={() => {
+                                const newStock = p.stock === 0 ? 10 : 0;
+                                supabase.from('products').update({ stock: newStock }).eq('id', p.id).then(fetchProducts);
+                                toast.success(newStock === 0 ? 'Marked Out of Stock' : 'Marked In Stock');
+                             }} className={cn("p-3 bg-white rounded-2xl shadow-2xl transition-colors", p.stock === 0 ? "text-emerald-500" : "text-amber-500")}>
+                                <Check size={18} />
+                             </button>
                              <button onClick={() => startEdit(p)} className="p-3 bg-white rounded-2xl text-gray-900 hover:text-primary shadow-2xl"><Edit3 size={18} /></button>
                              <button onClick={() => { if(confirm('Delete?')) supabase.from('products').delete().eq('id', p.id).then(fetchProducts); }} className="p-3 bg-white rounded-2xl text-gray-900 hover:text-red-500 shadow-2xl"><Trash2 size={18} /></button>
                           </div>
+                          {p.stock === 0 && (
+                            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center p-4">
+                               <div className="bg-red-500 text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl">Out of Stock</div>
+                            </div>
+                          )}
                        </div>
                        <div className="px-1 space-y-1">
                           <div className="flex items-center justify-between">
