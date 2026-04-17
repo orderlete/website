@@ -67,6 +67,8 @@ export default function AuthPage() {
       if (profile) {
         const hashed = await hashPassword(password);
         if (profile.password === hashed) {
+          // Set secure user session cookie for Middleware
+          document.cookie = `user_session=${profile.id}; path=/; samesite=strict`;
           setUser(profile);
           toast.success(`Welcome back, ${profile.name}!`);
           router.push('/');
