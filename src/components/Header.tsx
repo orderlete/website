@@ -60,7 +60,7 @@ export default function Header({ searchQuery, setSearchQuery, placeholder = "Sea
     // Real-time subscription for notifications
     const channel = supabase
       .channel('public:notifications')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, (payload) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, (payload: any) => {
         const newNotif = payload.new as Notification;
         // Only show if it matches current user OR is public (null user_id)
         if (!newNotif.user_id || newNotif.user_id === user?.id) {

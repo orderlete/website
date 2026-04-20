@@ -72,7 +72,7 @@ export default function Home() {
             let maxDiscount = (p as any).discount_percent || 0;
             if ((p as any).subcategories && (p as any).subcategories.length > 0) {
               (p as any).subcategories.forEach((sub: string) => {
-                const catMatch = cats.find(c => c.name === sub);
+                const catMatch = cats.find((c: any) => c.name === sub);
                 if (catMatch && catMatch.discount_percent && catMatch.discount_percent > maxDiscount) {
                   maxDiscount = catMatch.discount_percent;
                 }

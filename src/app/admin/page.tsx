@@ -35,8 +35,8 @@ export default function AdminDashboard() {
 
       const orderList = orders || [];
       const profileList = profiles || [];
-      const totalRev = orderList.reduce((sum, order) => sum + Number(order.total_amount), 0);
-      const pending = orderList.filter(o => o.status !== 'delivered' && o.status !== 'cancelled').length;
+      const totalRev = orderList.reduce((sum: number, order: any) => sum + Number(order.total_amount), 0);
+      const pending = orderList.filter((o: any) => o.status !== 'delivered' && o.status !== 'cancelled').length;
       
       setStats({
         totalOrders: orderList.length,

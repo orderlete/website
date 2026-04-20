@@ -85,7 +85,7 @@ export default function ProductPage() {
               .limit(4);
 
             if (relatedData) {
-              const finalRelated = relatedData.map(p => {
+              const finalRelated = relatedData.map((p: any) => {
                 let rMaxDiscount = 0;
                 if (fetchedCats.length > 0 && p.subcategories) {
                   p.subcategories.forEach((sub: string) => {
@@ -117,7 +117,7 @@ export default function ProductPage() {
           .eq('product_id', id);
 
         if (reviews && reviews.length > 0) {
-          const sum = reviews.reduce((acc, r) => acc + r.product_rating, 0);
+          const sum = reviews.reduce((acc: number, r: any) => acc + r.product_rating, 0);
           setAvgRating(parseFloat((sum / reviews.length).toFixed(1)));
           setReviewCount(reviews.length);
         } else {

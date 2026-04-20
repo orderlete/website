@@ -9,9 +9,15 @@ export interface Product {
   price: number;
   image_url: string;
   description: string;
+  subtitle?: string;
+  about?: string;
   rating?: number;
   review_count?: number;
   stock: number;
+  tags?: string[];
+  original_price?: number;
+  discount_percent?: number;
+  sales_count?: number;
   is_featured?: boolean;
   featured_priority?: number;
   is_ad?: boolean;
