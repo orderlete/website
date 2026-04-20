@@ -29,8 +29,10 @@ export default function AdminOrders() {
     fetchOrders();
     const channel = supabase
       .channel('schema-db-changes')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, () => {
-        toast.success('🔔 New Order received!', { duration: 5000 });
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          toast.success('🔔 New Order received!', { duration: 5000 });
+        }
         fetchOrders();
       })
       .subscribe();

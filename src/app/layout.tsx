@@ -24,8 +24,14 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Orderlete — Premium Cakes & Medical Delivery",
-  description: "Experience lightning-fast delivery of artisanal cakes and medical essentials. Order now for 15-minute delivery.",
+  title: "Orderlete | Quick Commerce",
+  description: "Get essentials delivered in minutes",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Orderlete",
+  },
 };
 
 export const viewport: Viewport = {
@@ -42,6 +48,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <html lang="en">
       <body

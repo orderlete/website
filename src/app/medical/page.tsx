@@ -102,7 +102,23 @@ export default function MedicalPage() {
         setTimeout(() => setLoading(false), 500);
       }
     }
+    // Realtime Subscriptions
+    const bannersChannel = supabase
+      .channel('banners-realtime-med')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'banners' }, () => fetchData())
+      .subscribe();
+
+    const productsChannel = supabase
+      .channel('products-realtime-med')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => fetchData())
+      .subscribe();
+
     fetchData();
+
+    return () => {
+      supabase.removeChannel(bannersChannel);
+      supabase.removeChannel(productsChannel);
+    };
   }, []);
 
   useEffect(() => {

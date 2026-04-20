@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, Sparkles } from 'lucide-react';
 import { useSettingsStore } from '@/store/useSettingsStore';
+import { supabase } from '@/lib/supabase';
+import toast from 'react-hot-toast';
 
 export default function GlobalLoader({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
@@ -32,6 +34,22 @@ export default function GlobalLoader({ children }: { children: React.ReactNode }
       }, 2000);
       return () => clearTimeout(timer);
     }
+  }, []);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('global-realtime')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, () => {
+         toast.success('🔔 New Order Placed!', {
+           icon: '🛍️',
+           duration: 5000
+         });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   if (!mounted) return null;
