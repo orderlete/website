@@ -12,9 +12,13 @@ export interface Product {
   rating?: number;
   review_count?: number;
   stock: number;
-  tags?: string[];
-  original_price?: number;
-  discount_percent?: number;
+  is_featured?: boolean;
+  featured_priority?: number;
+  is_ad?: boolean;
+  ad_created_at?: string;
+  categories?: string[];
+  subcategories?: string[];
+  features?: string[];
 }
 
 interface CartItem extends Product {
