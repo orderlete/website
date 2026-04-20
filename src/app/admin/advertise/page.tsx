@@ -99,7 +99,18 @@ export default function AdvertisePage() {
       }
       setIsAddingBanner(false);
       setEditingBanner(null);
-      setNewBanner({ title: '', subtitle: '', image_url: '', link_url: '', priority: 1, bg_color: '#000000' });
+      setNewBanner({ 
+        title: '', 
+        subtitle: '', 
+        image_url: '', 
+        link_url: '', 
+        priority: 1, 
+        bg_color: '#000000',
+        alignment: 'center-center',
+        image_alignment: 'center',
+        overlay_opacity: 0.8,
+        has_border: false
+      });
       fetchData();
     } catch (err: any) {
       console.error('Save Banner Error:', err);
